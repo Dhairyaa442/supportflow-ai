@@ -1,0 +1,39 @@
+services:
+
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: supportflow-db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: supportflow
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    container_name: supportflow-redis
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./backend
+    container_name: supportflow-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - redis
+
+  worker:
+    build: ./backend
+    container_name: supportflow-worker
+    command: celery -A app.worker.celery worker --loglevel=info
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - redis
