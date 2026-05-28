@@ -20,3 +20,5 @@ class Ticket(Base):
     status = Column(String, default="OPEN")
 
     embedding = Column(Vector(1536))
+
+    resolution = Column(Text, nullable=True)
