@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.services.embedding_service import generate_embedding
 from sqlalchemy import func
+from app.schemas.resolution import ResolutionRequest
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -200,3 +201,29 @@ def get_analytics(db: Session = Depends(get_db)):
         "high_priority": high_priority,
         "open_tickets": open_tickets
     }
+
+@app.post("/tickets/{ticket_id}/resolve")
+def resolve_ticket(
+    ticket_id: int,
+    request: ResolutionRequest,
+    db: Session = Depends(get_db)
+):
+
+    ticket = db.query(Ticket).filter(
+        Ticket.id == ticket_id
+    ).first()
+
+    if not ticket:
+        return {
+            "error": "Ticket not found"
+        }
+
+    ticket.status = "CLOSED"
+    ticket.resolution = request.resolution
+
+    db.commit()
+
+    return {
+        "message": "Ticket resolved successfully"
+    }
+

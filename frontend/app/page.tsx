@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -12,6 +13,7 @@ import {
 
 import StatCard from "../components/StatCard";
 import TicketTable from "../components/TicketTable";
+import RecommendationModal from "../components/RecommendationModal";
 
 type Analytics = {
   total_tickets: number;
@@ -25,6 +27,7 @@ type Analytics = {
 type TicketType = {
   id: number;
   title: string;
+  description: string;
   category: string;
   priority: string;
   status: string;
@@ -36,6 +39,12 @@ export default function Home() {
 
   const [tickets, setTickets] =
     useState<TicketType[]>([]);
+
+  const [modalOpen, setModalOpen] =
+    useState(false);
+
+  const [recommendation, setRecommendation] =
+    useState("");
 
   useEffect(() => {
     axios
@@ -49,10 +58,35 @@ export default function Home() {
       .catch(console.error);
   }, []);
 
+  const handleRecommendation = async (
+    description: string
+  ) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/tickets/recommendation",
+        null,
+        {
+          params: {
+            description,
+          },
+        }
+      );
+
+      setRecommendation(
+        response.data.recommended_resolution
+      );
+
+      setModalOpen(true);
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   if (!analytics) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-slate-100">
-        <h1 className="text-xl font-semibold">
+      <main className="min-h-screen flex items-center justify-center bg-slate-950">
+        <h1 className="text-xl font-semibold text-white">
           Loading dashboard...
         </h1>
       </main>
@@ -60,19 +94,17 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 p-8">
-      {/* Header */}
+    <main className="min-h-screen bg-slate-950 text-white p-8">
       <div className="mb-10">
-        <h1 className="text-4xl font-bold text-slate-900">
+        <h1 className="text-5xl font-bold">
           SupportFlowAI
         </h1>
 
-        <p className="text-gray-500 mt-2">
-          AI-Powered Support Ticket Intelligence Platform
+        <p className="text-slate-400 mt-2">
+          AI-Powered Support Operations Dashboard
         </p>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <StatCard
           title="Total Tickets"
@@ -99,47 +131,54 @@ export default function Home() {
         />
       </div>
 
-      {/* Analytics Section */}
-      <div className="mt-8 bg-white rounded-2xl shadow-md p-6">
-        <h2 className="text-xl font-semibold text-slate-900 mb-6">
+      <div className="mt-8 bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <h2 className="text-xl font-semibold mb-6">
           Ticket Analytics
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <p className="text-gray-500 text-sm">
+            <p className="text-slate-400 text-sm">
               Open Tickets
             </p>
 
-            <p className="text-3xl font-bold text-slate-900 mt-2">
+            <p className="text-3xl font-bold mt-2">
               {analytics.open_tickets}
             </p>
           </div>
 
           <div>
-            <p className="text-gray-500 text-sm">
+            <p className="text-slate-400 text-sm">
               High Priority Tickets
             </p>
 
-            <p className="text-3xl font-bold text-red-600 mt-2">
+            <p className="text-3xl font-bold text-red-400 mt-2">
               {analytics.high_priority}
             </p>
           </div>
 
           <div>
-            <p className="text-gray-500 text-sm">
+            <p className="text-slate-400 text-sm">
               Resolution Rate
             </p>
 
-            <p className="text-3xl font-bold text-green-600 mt-2">
+            <p className="text-3xl font-bold text-emerald-400 mt-2">
               0%
             </p>
           </div>
         </div>
       </div>
 
-      {/* Recent Tickets */}
-      <TicketTable tickets={tickets} />
+      <TicketTable
+        tickets={tickets}
+        onRecommendation={handleRecommendation}
+      />
+
+      <RecommendationModal
+        open={modalOpen}
+        recommendation={recommendation}
+        onClose={() => setModalOpen(false)}
+      />
     </main>
   );
 }

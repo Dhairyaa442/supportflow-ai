@@ -1,6 +1,7 @@
 type Ticket = {
   id: number;
   title: string;
+  description: string;
   category: string;
   priority: string;
   status: string;
@@ -8,10 +9,14 @@ type Ticket = {
 
 type Props = {
   tickets: Ticket[];
+  onRecommendation: (
+    description: string
+  ) => void;
 };
 
 export default function TicketTable({
   tickets,
+  onRecommendation,
 }: Props) {
   const getPriorityBadge = (priority: string) => {
     if (priority === "HIGH") {
@@ -155,7 +160,12 @@ export default function TicketTable({
 
                 <td className="p-4">
                   <div className="flex gap-2">
-                    <button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition">
+                    <button
+                      onClick={() =>
+                        onRecommendation(ticket.description)
+                      }
+                      className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition"
+                    >
                       AI Suggestion
                     </button>
 
