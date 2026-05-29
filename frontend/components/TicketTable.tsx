@@ -1,3 +1,6 @@
+import { useState } from "react";
+import axios from "axios";
+
 type Ticket = {
   id: number;
   title: string;
@@ -18,7 +21,18 @@ export default function TicketTable({
   tickets,
   onRecommendation,
 }: Props) {
-  const getPriorityBadge = (priority: string) => {
+  const [selectedTicket, setSelectedTicket] =
+    useState<number | null>(null);
+
+  const [resolution, setResolution] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const getPriorityBadge = (
+    priority: string
+  ) => {
     if (priority === "HIGH") {
       return (
         <span className="bg-red-500/20 text-red-300 px-3 py-1 rounded-full text-xs font-medium">
@@ -42,7 +56,9 @@ export default function TicketTable({
     );
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (
+    status: string
+  ) => {
     if (status === "OPEN") {
       return (
         <span className="bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full text-xs font-medium">
@@ -58,7 +74,9 @@ export default function TicketTable({
     );
   };
 
-  const getCategoryBadge = (category: string) => {
+  const getCategoryBadge = (
+    category: string
+  ) => {
     if (category === "Security") {
       return (
         <span className="bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-full text-xs font-medium">
@@ -91,94 +109,172 @@ export default function TicketTable({
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl p-6 mt-8">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-white">
-          Recent Tickets
-        </h2>
+    <>
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl p-6 mt-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-white">
+            Recent Tickets
+          </h2>
 
-        <span className="text-sm text-slate-400">
-          {tickets.length} Tickets
-        </span>
-      </div>
+          <span className="text-sm text-slate-400">
+            {tickets.length} Tickets
+          </span>
+        </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-slate-700">
-              <th className="text-left p-4 text-slate-400 uppercase text-xs tracking-wider">
-                ID
-              </th>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-slate-700">
+                <th className="text-left p-4 text-slate-400 uppercase text-xs tracking-wider">
+                  ID
+                </th>
 
-              <th className="text-left p-4 text-slate-400 uppercase text-xs tracking-wider">
-                Title
-              </th>
+                <th className="text-left p-4 text-slate-400 uppercase text-xs tracking-wider">
+                  Title
+                </th>
 
-              <th className="text-left p-4 text-slate-400 uppercase text-xs tracking-wider">
-                Category
-              </th>
+                <th className="text-left p-4 text-slate-400 uppercase text-xs tracking-wider">
+                  Category
+                </th>
 
-              <th className="text-left p-4 text-slate-400 uppercase text-xs tracking-wider">
-                Priority
-              </th>
+                <th className="text-left p-4 text-slate-400 uppercase text-xs tracking-wider">
+                  Priority
+                </th>
 
-              <th className="text-left p-4 text-slate-400 uppercase text-xs tracking-wider">
-                Status
-              </th>
+                <th className="text-left p-4 text-slate-400 uppercase text-xs tracking-wider">
+                  Status
+                </th>
 
-              <th className="text-left p-4 text-slate-400 uppercase text-xs tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {tickets.map((ticket) => (
-              <tr
-                key={ticket.id}
-                className="border-b border-slate-800 hover:bg-slate-800 transition"
-              >
-                <td className="p-4 text-white font-medium">
-                  #{ticket.id}
-                </td>
-
-                <td className="p-4 text-slate-200">
-                  {ticket.title}
-                </td>
-
-                <td className="p-4">
-                  {getCategoryBadge(ticket.category)}
-                </td>
-
-                <td className="p-4">
-                  {getPriorityBadge(ticket.priority)}
-                </td>
-
-                <td className="p-4">
-                  {getStatusBadge(ticket.status)}
-                </td>
-
-                <td className="p-4">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() =>
-                        onRecommendation(ticket.description)
-                      }
-                      className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition"
-                    >
-                      AI Suggestion
-                    </button>
-
-                    <button className="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition">
-                      Resolve
-                    </button>
-                  </div>
-                </td>
+                <th className="text-left p-4 text-slate-400 uppercase text-xs tracking-wider">
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {tickets.map((ticket) => (
+                <tr
+                  key={ticket.id}
+                  className="border-b border-slate-800 hover:bg-slate-800 transition"
+                >
+                  <td className="p-4 text-white font-medium">
+                    #{ticket.id}
+                  </td>
+
+                  <td className="p-4 text-slate-200">
+                    {ticket.title}
+                  </td>
+
+                  <td className="p-4">
+                    {getCategoryBadge(
+                      ticket.category
+                    )}
+                  </td>
+
+                  <td className="p-4">
+                    {getPriorityBadge(
+                      ticket.priority
+                    )}
+                  </td>
+
+                  <td className="p-4">
+                    {getStatusBadge(
+                      ticket.status
+                    )}
+                  </td>
+
+                  <td className="p-4">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() =>
+                          onRecommendation(
+                            ticket.description
+                          )
+                        }
+                        className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition"
+                      >
+                        AI Suggestion
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          setSelectedTicket(
+                            ticket.id
+                          )
+                        }
+                        className="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition"
+                      >
+                        Resolve
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+
+      {selectedTicket && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-[500px]">
+            <h2 className="text-xl font-semibold text-white mb-4">
+              Resolve Ticket #{selectedTicket}
+            </h2>
+
+            <textarea
+              value={resolution}
+              onChange={(e) =>
+                setResolution(
+                  e.target.value
+                )
+              }
+              placeholder="Enter resolution notes..."
+              className="w-full h-32 bg-slate-800 border border-slate-700 rounded-lg p-3 text-white"
+            />
+
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={() => {
+                  setSelectedTicket(
+                    null
+                  );
+                  setResolution("");
+                }}
+                className="bg-slate-700 text-white px-4 py-2 rounded-lg"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={async () => {
+                  try {
+                    setLoading(true);
+
+                    await axios.post(
+                      `http://localhost:8000/tickets/${selectedTicket}/resolve`,
+                      {
+                        resolution,
+                      }
+                    );
+
+                    window.location.reload();
+                  } catch (error) {
+                    console.error(error);
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                className="bg-emerald-600 text-white px-4 py-2 rounded-lg"
+              >
+                {loading
+                  ? "Saving..."
+                  : "Save Resolution"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

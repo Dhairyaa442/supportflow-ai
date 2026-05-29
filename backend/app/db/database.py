@@ -1,4 +1,5 @@
-from sqlalchemy import create_engine
+
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 import os
 
@@ -8,6 +9,17 @@ DATABASE_URL = os.getenv(
 )
 
 engine = create_engine(DATABASE_URL)
+
+try:
+    with engine.connect() as conn:
+        conn.execute(
+            text(
+                "CREATE EXTENSION IF NOT EXISTS vector"
+            )
+        )
+        conn.commit()
+except Exception as e:
+    print("Could not create vector extension:", e)
 
 SessionLocal = sessionmaker(
     autocommit=False,
