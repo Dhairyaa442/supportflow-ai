@@ -193,13 +193,25 @@ def get_analytics(db: Session = Depends(get_db)):
         Ticket.status == "OPEN"
     ).count()
 
+    closed_tickets = db.query(Ticket).filter(
+        Ticket.status == "CLOSED"
+    ).count()
+
+    resolution_rate = (
+        round((closed_tickets / total_tickets) * 100, 1)
+        if total_tickets > 0
+        else 0
+    )
+
     return {
         "total_tickets": total_tickets,
         "security": security,
         "billing": billing,
         "technical": technical,
         "high_priority": high_priority,
-        "open_tickets": open_tickets
+        "open_tickets": open_tickets,
+        "closed_tickets": closed_tickets,
+        "resolution_rate": resolution_rate
     }
 
 @app.post("/tickets/{ticket_id}/resolve")

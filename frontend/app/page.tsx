@@ -22,8 +22,9 @@ type Analytics = {
   technical: number;
   high_priority: number;
   open_tickets: number;
+  closed_tickets: number;
+  resolution_rate: number;
 };
-
 type TicketType = {
   id: number;
   title: string;
@@ -149,11 +150,11 @@ export default function Home() {
 
           <div>
             <p className="text-slate-400 text-sm">
-              High Priority Tickets
+              Closed Tickets
             </p>
 
             <p className="text-3xl font-bold text-red-400 mt-2">
-              {analytics.high_priority}
+              {analytics.closed_tickets}
             </p>
           </div>
 
@@ -163,7 +164,7 @@ export default function Home() {
             </p>
 
             <p className="text-3xl font-bold text-emerald-400 mt-2">
-              0%
+              {analytics.resolution_rate}%
             </p>
           </div>
         </div>
