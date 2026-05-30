@@ -54,11 +54,19 @@ def get_tickets(db: Session = Depends(get_db)):
     return response
 
 @app.post("/tickets")
-def create_ticket(ticket: TicketCreate, db: Session = Depends(get_db)):
+def create_ticket(
+    ticket: TicketCreate,
+    db: Session = Depends(get_db)
+):
+
+    embedding = generate_embedding(
+        ticket.description
+    )
 
     db_ticket = Ticket(
         title=ticket.title,
-        description=ticket.description
+        description=ticket.description,
+        embedding=embedding
     )
 
     db.add(db_ticket)
@@ -74,37 +82,42 @@ def create_ticket(ticket: TicketCreate, db: Session = Depends(get_db)):
         "message": "Ticket created successfully",
         "ticket_id": db_ticket.id
     }
+        
 
 @app.get("/tickets/similar")
 def find_similar_tickets(
-    query: str,
+    description: str,
     db: Session = Depends(get_db)
 ):
-
-    embedding = generate_embedding(query)
-
-    sql = text("""
-        SELECT
-            id,
-            title,
-            description,
-            priority,
-            category,
-            embedding <=> CAST(:embedding AS vector) AS distance
-        FROM tickets
-        WHERE embedding IS NOT NULL
-        ORDER BY distance
-        LIMIT 5
-    """)
-
-    results = db.execute(
-        sql,
-        {
-            "embedding": str(embedding)
-        }
+    query_embedding = generate_embedding(
+        description
     )
 
-    return [dict(row._mapping) for row in results]
+    results = (
+        db.query(
+            Ticket,
+            Ticket.embedding.cosine_distance(
+                query_embedding
+            ).label("distance")
+        )
+        .order_by("distance")
+        .limit(5)
+        .all()
+    )
+
+    return [
+        {
+            "id": ticket.id,
+            "title": ticket.title,
+            "category": ticket.category,
+            "status": ticket.status,
+            "similarity": round(
+                (1 - distance) * 100,
+                2
+            )
+        }
+        for ticket, distance in results
+    ]
 
 @app.post("/tickets/recommendation")
 def get_recommendation(
