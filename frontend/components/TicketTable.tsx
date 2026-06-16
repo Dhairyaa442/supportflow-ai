@@ -196,16 +196,23 @@ export default function TicketTable({
                         AI Suggestion
                       </button>
 
+                      {ticket.status === "CLOSED" ? (
+                      <button
+                        disabled
+                        className="bg-slate-700 text-slate-400 px-3 py-2 rounded-lg text-sm font-medium cursor-not-allowed"
+                      >
+                        Resolved
+                      </button>
+                    ) : (
                       <button
                         onClick={() =>
-                          setSelectedTicket(
-                            ticket.id
-                          )
+                          setSelectedTicket(ticket.id)
                         }
                         className="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition"
                       >
                         Resolve
                       </button>
+                    )}
                     </div>
                   </td>
                 </tr>
@@ -258,7 +265,7 @@ export default function TicketTable({
                       }
                     );
 
-                    window.location.reload();
+                    window.location.href = "/";
                   } catch (error) {
                     console.error(error);
                   } finally {

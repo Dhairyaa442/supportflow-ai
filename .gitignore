@@ -1,7 +1,32 @@
+# Python
 venv/
 __pycache__/
-.env
 *.pyc
+.env
+
+# Next.js
+.next/
+node_modules/
+out/
+
+# OS
 .DS_Store
+
+# IDE
 .idea/
 .vscode/
+
+# Logs
+*.log
+
+# Build artifacts
+dist/
+build/
+
+# Database
+*.db
+
+# Environment files
+.env.local
+.env.production
+.env.development
