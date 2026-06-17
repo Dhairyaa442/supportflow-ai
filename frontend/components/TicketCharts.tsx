@@ -114,20 +114,6 @@ export default function TicketCharts({
                 </PieChart>
               </ResponsiveContainer>
             </div>
-
-            <div className="mt-4 flex justify-center gap-8 text-sm">
-              <div className="text-cyan-400">
-                Security: {security}
-              </div>
-
-              <div className="text-violet-400">
-                Billing: {billing}
-              </div>
-
-              <div className="text-orange-400">
-                Technical: {technical}
-              </div>
-            </div>
           </ResponsiveContainer>
         </div>
       </div>
